@@ -340,37 +340,39 @@ export function MessageView({
         </View>
       )}
 
-      {/* Messages FlatList - Takes remaining space */}
-      <FlatList
-        ref={flatListRef}
-        data={allItems}
-        keyExtractor={(item) => item.id}
-        renderItem={renderMessage}
-        style={styles.messagesContainer}
-        contentContainerStyle={{
-          paddingTop: 12,
-          paddingBottom: 60 + insets.bottom + 12 + keyboardHeight - 16, // composer height + keyboard height - 16px
-          paddingHorizontal: 16,
-        }}
-        keyboardShouldPersistTaps="handled"
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-      />
-
-      {/* Composer - Positioned at keyboard level */}
-      <View
-        style={[
-          styles.composerWrap,
-          {
-            position: 'absolute',
-            bottom: keyboardHeight,
-            left: 0,
-            right: 0,
-            paddingBottom: Platform.OS === 'ios' ? insets.bottom - 16 : insets.bottom + 16,
-            borderTopColor: borderColor,
-            backgroundColor,
-          },
-        ]}
+      {/* KeyboardAvoidingView wraps the entire layout */}
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
+        keyboardVerticalOffset={insets.top}
       >
+        {/* Messages FlatList - Takes remaining space */}
+        <FlatList
+          ref={flatListRef}
+          data={allItems}
+          keyExtractor={(item) => item.id}
+          renderItem={renderMessage}
+          style={styles.messagesContainer}
+          contentContainerStyle={{
+            paddingTop: 12,
+            paddingBottom: 12 + 16,
+            paddingHorizontal: 16,
+          }}
+          keyboardShouldPersistTaps="handled"
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        />
+
+        {/* Composer - Fixed at bottom, no absolute positioning */}
+        <View
+          style={[
+            styles.composerWrap,
+            {
+              paddingBottom: Platform.OS === 'ios' ? insets.bottom - 16 : insets.bottom,
+              borderTopColor: borderColor,
+              backgroundColor,
+            },
+          ]}
+        >
         <TextInput
           style={[styles.input, { backgroundColor: inputBg, borderColor, color: textColor }]}
           placeholder="Type a message..."
@@ -395,7 +397,8 @@ export function MessageView({
         >
           <Send size={20} color="#ffffff" />
         </TouchableOpacity>
-      </View>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 }
