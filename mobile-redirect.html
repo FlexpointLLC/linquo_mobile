@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to Linquo Mobile App</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #3b82f6, #1e40af);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+            backdrop-filter: blur(10px);
+            max-width: 400px;
+        }
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .button {
+            background: white;
+            color: #3b82f6;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .button:hover {
+            background: #f8fafc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>Redirecting to Linquo Mobile App</h2>
+        <p>Please wait while we redirect you back to the mobile app...</p>
+        <a href="#" id="redirectBtn" class="button" style="display: none;">Open in App</a>
+    </div>
+
+    <script>
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const mobileRedirect = urlParams.get('mobile_redirect');
+        
+        // Try to redirect to mobile app
+        if (mobileRedirect) {
+            // First, try to redirect to the mobile app
+            window.location.href = mobileRedirect;
+            
+            // If that doesn't work, show the manual button
+            setTimeout(() => {
+                document.getElementById('redirectBtn').style.display = 'inline-block';
+                document.getElementById('redirectBtn').href = mobileRedirect;
+            }, 2000);
+        } else {
+            // No mobile redirect specified, redirect to dashboard
+            setTimeout(() => {
+                window.location.href = '/dashboard';
+            }, 2000);
+        }
+        
+        // Handle manual button click
+        document.getElementById('redirectBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = mobileRedirect;
+        });
+    </script>
+</body>
+</html>

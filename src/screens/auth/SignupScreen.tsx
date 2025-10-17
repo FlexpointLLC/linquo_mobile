@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,15 @@ import {
   Image,
   StatusBar,
   SafeAreaView,
+  AppState,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { signInWithGoogle, initializeGoogleAuth, checkForOAuthSession } from '../../services/googleAuth';
+import { handleGoogleAuthCallback, createDefaultOrganizationForGoogleUser } from '../../services/googleAuthHandler';
+import { GoogleSignInWebView } from '../../components/auth/GoogleSignInWebView';
 
 // Sun and Moon SVG icons as text (simplified)
 const SunIcon = () => <Text style={styles.iconText}>☀️</Text>;
@@ -32,6 +36,7 @@ export default function SignupScreen() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showGoogleWebView, setShowGoogleWebView] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({
     name: '',
     email: '',
@@ -43,6 +48,50 @@ export default function SignupScreen() {
   const { isDarkMode, toggleTheme } = useTheme();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    // Initialize Google Auth when component mounts
+    initializeGoogleAuth();
+  }, []);
+
+  // Check for OAuth session when app becomes active
+  useEffect(() => {
+    let pollInterval: NodeJS.Timeout | null = null;
+
+    const handleAppStateChange = async (nextAppState: string) => {
+      if (nextAppState === 'active') {
+        // Start polling for OAuth session
+        pollInterval = setInterval(async () => {
+          const sessionResult = await checkForOAuthSession();
+          if (sessionResult.success && sessionResult.user) {
+            console.log('OAuth session found, user authenticated');
+            if (pollInterval) clearInterval(pollInterval);
+            // The auth state change will automatically navigate to dashboard
+          }
+        }, 2000); // Check every 2 seconds
+
+        // Stop polling after 30 seconds
+        setTimeout(() => {
+          if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+          }
+        }, 30000);
+      } else {
+        // Stop polling when app goes to background
+        if (pollInterval) {
+          clearInterval(pollInterval);
+          pollInterval = null;
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    return () => {
+      subscription?.remove();
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, []);
 
   const validateField = (field: string, value: string) => {
     let error = '';
@@ -363,6 +412,21 @@ export default function SignupScreen() {
     }
   };
 
+  const handleGoogleSignup = () => {
+    setShowGoogleWebView(true);
+  };
+
+  const handleGoogleWebViewSuccess = () => {
+    setShowGoogleWebView(false);
+    setLoading(false);
+    // The auth state change will automatically navigate to dashboard
+  };
+
+  const handleGoogleWebViewError = (error: string) => {
+    setError(error);
+    setShowGoogleWebView(false);
+  };
+
   // Unified background color matching branding
   const backgroundColor = isDarkMode ? '#0f172a' : '#ffffff';
   const textColor = isDarkMode ? '#ffffff' : '#0f172a';
@@ -536,9 +600,17 @@ export default function SignupScreen() {
             {/* Google Sign Up Button */}
             <TouchableOpacity
               style={[styles.googleButton, { borderColor: inputBorder, backgroundColor: cardBg }]}
+              onPress={handleGoogleSignup}
               disabled={loading}
             >
-              <Text style={[styles.googleButtonText, { color: textColor }]}>🔍 Continue with Google</Text>
+              <View style={styles.googleButtonContent}>
+                <Image
+                  source={require('../../../assets/google-logo.png')}
+                  style={styles.googleLogo}
+                  resizeMode="contain"
+                />
+                <Text style={[styles.googleButtonText, { color: textColor }]}>Continue with Google</Text>
+              </View>
             </TouchableOpacity>
           </View>
 
@@ -557,6 +629,14 @@ export default function SignupScreen() {
             </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      
+      {/* Google Sign-In WebView Modal */}
+      <GoogleSignInWebView
+        visible={showGoogleWebView}
+        onClose={() => setShowGoogleWebView(false)}
+        onSuccess={handleGoogleWebViewSuccess}
+        onError={handleGoogleWebViewError}
+      />
     </View>
   );
 }
@@ -732,6 +812,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  googleButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  googleLogo: {
+    width: 20,
+    height: 20,
+    marginRight: 12,
   },
   googleButtonText: {
     fontSize: 14,
