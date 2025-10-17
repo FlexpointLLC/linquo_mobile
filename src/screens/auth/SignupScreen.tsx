@@ -11,7 +11,9 @@ import {
   ScrollView,
   Image,
   StatusBar,
+  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -40,6 +42,7 @@ export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const validateField = (field: string, value: string) => {
     let error = '';
@@ -384,7 +387,7 @@ export default function SignupScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Top Bar with Logo and Theme Toggle */}
-          <View style={styles.topBar}>
+          <View style={[styles.topBar, { top: insets.top + 16 }]}>
             <Image
               source={require('../../../assets/Logo.png')}
               style={styles.logoImage}
@@ -399,7 +402,7 @@ export default function SignupScreen() {
           </View>
 
         {/* Card Content */}
-        <View style={[styles.card, { backgroundColor: cardBg }]}>
+        <View style={[styles.card, { backgroundColor: cardBg, paddingTop: insets.top + 100 }]}>
           <View style={styles.cardHeader}>
             <Text style={[styles.title, { color: textColor }]}>Create Your Account</Text>
             <Text style={[styles.subtitle, { color: mutedText }]}>Set up your organization and start using Linquo</Text>
@@ -572,7 +575,6 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: 'absolute',
-    top: (StatusBar.currentHeight || 0) + 16,
     left: 16,
     right: 16,
     flexDirection: 'row',
@@ -600,7 +602,6 @@ const styles = StyleSheet.create({
     maxWidth: 448,
     alignSelf: 'center',
     paddingHorizontal: 16,
-    paddingTop: 80,
     paddingBottom: 24,
   },
   cardHeader: {

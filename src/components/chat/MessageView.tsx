@@ -68,6 +68,17 @@ export function MessageView({
   const flatListRef = useRef<FlatList>(null);
   const insets = useSafeAreaInsets();
 
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (flatListRef.current && allItems.length > 0) {
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 200);
+      });
+    }
+  };
+
   // Typing indicator
   const { typingUsers, handleTypingStart, handleTypingStop } = useTypingIndicator(
     conversationId,
@@ -75,15 +86,23 @@ export function MessageView({
     'agent'
   );
 
-  // Track keyboard height
+  // Track keyboard events for auto-scroll and height detection
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => setKeyboardHeight(e.endCoordinates.height)
+      (e) => {
+        setKeyboardHeight(e.endCoordinates.height);
+        // Auto-scroll to bottom when keyboard appears
+        scrollToBottom();
+      }
     );
     const keyboardWillHide = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => setKeyboardHeight(0)
+      () => {
+        setKeyboardHeight(0);
+        // Auto-scroll to bottom when keyboard hides
+        scrollToBottom();
+      }
     );
 
     return () => {
@@ -91,6 +110,13 @@ export function MessageView({
       keyboardWillHide.remove();
     };
   }, []);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages.length]);
 
   const backgroundColor = isDarkMode ? '#0f172a' : '#ffffff';
   const textColor = isDarkMode ? '#ffffff' : '#0f172a';
@@ -314,65 +340,62 @@ export function MessageView({
         </View>
       )}
 
-      {/* KeyboardAvoidingView wraps FlatList + Composer */}
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={0}
-      >
-        {/* Messages FlatList */}
-        <FlatList
-          ref={flatListRef}
-          data={allItems}
-          keyExtractor={(item) => item.id}
-          renderItem={renderMessage}
-          contentContainerStyle={{
-            paddingTop: 12,
-            paddingBottom: INPUT_BAR_HEIGHT + 12 + insets.bottom + (Platform.OS === 'android' ? keyboardHeight : 0) + (keyboardHeight > 0 ? 24 : 0),
-            paddingHorizontal: 16,
-          }}
-          keyboardShouldPersistTaps="handled"
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        />
+      {/* Messages FlatList - Takes remaining space */}
+      <FlatList
+        ref={flatListRef}
+        data={allItems}
+        keyExtractor={(item) => item.id}
+        renderItem={renderMessage}
+        style={styles.messagesContainer}
+        contentContainerStyle={{
+          paddingTop: 12,
+          paddingBottom: 60 + insets.bottom + 12 + keyboardHeight - 16, // composer height + keyboard height - 16px
+          paddingHorizontal: 16,
+        }}
+        keyboardShouldPersistTaps="handled"
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+      />
 
-        {/* Composer - Absolutely positioned at bottom */}
-        <View
-          style={[
-            styles.composerWrap,
-            {
-              bottom: Platform.OS === 'android' ? keyboardHeight : 0,
-              paddingBottom: insets.bottom + (keyboardHeight > 0 ? 24 : 0),
-              borderTopColor: borderColor,
-              backgroundColor,
-            },
-          ]}
+      {/* Composer - Positioned at keyboard level */}
+      <View
+        style={[
+          styles.composerWrap,
+          {
+            position: 'absolute',
+            bottom: keyboardHeight,
+            left: 0,
+            right: 0,
+            paddingBottom: Platform.OS === 'ios' ? insets.bottom - 16 : insets.bottom + 16,
+            borderTopColor: borderColor,
+            backgroundColor,
+          },
+        ]}
+      >
+        <TextInput
+          style={[styles.input, { backgroundColor: inputBg, borderColor, color: textColor }]}
+          placeholder="Type a message..."
+          placeholderTextColor={mutedColor}
+          value={messageText}
+          onChangeText={(text) => {
+            setMessageText(text);
+            if (text.trim()) {
+              handleTypingStart();
+            } else {
+              handleTypingStop();
+            }
+          }}
+          onBlur={handleTypingStop}
+          multiline
+          maxLength={1000}
+        />
+        <TouchableOpacity
+          style={[styles.sendButton, { backgroundColor: agentBubbleBg }]}
+          onPress={handleSend}
+          disabled={!messageText.trim()}
         >
-          <TextInput
-            style={[styles.input, { backgroundColor: inputBg, borderColor, color: textColor }]}
-            placeholder="Type a message..."
-            placeholderTextColor={mutedColor}
-            value={messageText}
-            onChangeText={(text) => {
-              setMessageText(text);
-              if (text.trim()) {
-                handleTypingStart();
-              } else {
-                handleTypingStop();
-              }
-            }}
-            onBlur={handleTypingStop}
-            multiline
-            maxLength={1000}
-          />
-          <TouchableOpacity
-            style={[styles.sendButton, { backgroundColor: agentBubbleBg }]}
-            onPress={handleSend}
-            disabled={!messageText.trim()}
-          >
-            <Send size={20} color="#ffffff" />
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+          <Send size={20} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -506,11 +529,10 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontStyle: 'italic',
   },
+  messagesContainer: {
+    flex: 1,
+  },
   composerWrap: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: 8,

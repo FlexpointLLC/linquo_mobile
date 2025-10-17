@@ -11,7 +11,9 @@ import {
   ScrollView,
   Image,
   StatusBar,
+  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,6 +30,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -77,7 +80,7 @@ export default function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           {/* Top Bar with Logo and Theme Toggle */}
-          <View style={styles.topBar}>
+          <View style={[styles.topBar, { top: insets.top + 16 }]}>
             <Image
               source={require('../../../assets/Logo.png')}
               style={styles.logoImage}
@@ -92,7 +95,7 @@ export default function LoginScreen() {
           </View>
 
         {/* Card Content */}
-        <View style={[styles.card, { backgroundColor: cardBg }]}>
+        <View style={[styles.card, { backgroundColor: cardBg, paddingTop: insets.top - 84 }]}>
           <View style={styles.cardHeader}>
             <Text style={[styles.title, { color: textColor }]}>Welcome Back</Text>
             <Text style={[styles.subtitle, { color: mutedText }]}>Sign in to your Linquo account</Text>
@@ -210,7 +213,6 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: 'absolute',
-    top: (StatusBar.currentHeight || 0) + 16,
     left: 16,
     right: 16,
     flexDirection: 'row',
@@ -238,7 +240,6 @@ const styles = StyleSheet.create({
     maxWidth: 448,
     alignSelf: 'center',
     paddingHorizontal: 16,
-    paddingTop: 80,
     paddingBottom: 24,
   },
   cardHeader: {
