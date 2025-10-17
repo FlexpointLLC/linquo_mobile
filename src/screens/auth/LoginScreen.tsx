@@ -78,11 +78,11 @@ export default function LoginScreen() {
         >
           {/* Top Bar with Logo and Theme Toggle */}
           <View style={styles.topBar}>
-            {/* <Image
+            <Image
               source={require('../../../assets/Logo.png')}
               style={styles.logoImage}
               resizeMode="contain"
-            /> */}
+            />
             <TouchableOpacity 
               style={[styles.themeToggle, { borderColor: inputBorder, backgroundColor: inputBg }]}
               onPress={toggleTheme}

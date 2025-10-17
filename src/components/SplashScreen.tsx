@@ -19,11 +19,11 @@ export function SplashScreen() {
     <View style={styles.container}>
       <View style={styles.centerContent}>
         <Animated.View style={{ opacity: fadeAnim }}>
-          {/* <Image
+          <Image
             source={require('../../assets/splash-icon.png')}
             style={styles.logo}
             resizeMode="contain"
-          /> */}
+          />
         </Animated.View>
       </View>
       <Text style={styles.tagline}>
