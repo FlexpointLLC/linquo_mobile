@@ -6,9 +6,9 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { Message } from '../../types';
@@ -43,10 +43,10 @@ export default function ChatScreen({ route }: ChatScreenProps) {
       // Mark messages as read
       await supabase
         .from('messages')
-        .update({ is_read: true })
+        .update({ read_by_agent: true, read_at: new Date().toISOString() })
         .eq('conversation_id', conversationId)
-        .eq('sender_type', 'customer')
-        .eq('is_read', false);
+        .eq('sender_type', 'CUSTOMER')
+        .eq('read_by_agent', false);
 
     } catch (error) {
       console.error('Error fetching messages:', error);
@@ -148,12 +148,56 @@ export default function ChatScreen({ route }: ChatScreenProps) {
     );
   }
 
+  if (Platform.OS === 'ios') {
+    return (
+      <KeyboardAvoidingView
+        behavior="padding"
+        style={styles.container}
+        keyboardVerticalOffset={90}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.messagesList}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No messages yet</Text>
+            </View>
+          }
+        />
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type a message..."
+            placeholderTextColor="#9ca3af"
+            value={newMessage}
+            onChangeText={setNewMessage}
+            multiline
+            maxLength={1000}
+          />
+          <TouchableOpacity
+            style={[styles.sendButton, (!newMessage.trim() || sending) && styles.sendButtonDisabled]}
+            onPress={handleSend}
+            disabled={!newMessage.trim() || sending}
+          >
+            {sending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.sendButtonText}>Send</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  // Android: Use native adjustResize without KeyboardAvoidingView
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-      keyboardVerticalOffset={90}
-    >
+    <View style={styles.container}>
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -190,7 +234,7 @@ export default function ChatScreen({ route }: ChatScreenProps) {
           )}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -250,7 +294,9 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flexDirection: 'row',
-    padding: 12,
+    paddingTop: 12,
+    paddingHorizontal: 12,
+    paddingBottom: 12,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#e5e7eb',

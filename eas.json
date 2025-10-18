@@ -15,7 +15,7 @@
         "buildConfiguration": "Debug"
       },
       "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
+        "JAVA_HOME": "/opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home"
       }
     },
     "preview": {
@@ -39,7 +39,7 @@
         "image": "latest"
       },
       "env": {
-        "JAVA_HOME": "/usr/lib/jvm/java-17-openjdk-amd64"
+        "JAVA_HOME": "/opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home"
       }
     }
   },

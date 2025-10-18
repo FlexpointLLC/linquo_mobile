@@ -62,9 +62,9 @@ export function MessageView({
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
   const [messageText, setMessageText] = useState('');
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [showHighlight, setShowHighlight] = useState(true);
   const [hasScrolledToMessage, setHasScrolledToMessage] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const insets = useSafeAreaInsets();
 
@@ -86,7 +86,7 @@ export function MessageView({
     'agent'
   );
 
-  // Track keyboard events for auto-scroll and height detection
+  // Track keyboard events for auto-scroll and height management
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
@@ -343,8 +343,8 @@ export function MessageView({
       {/* KeyboardAvoidingView wraps the entire layout */}
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'height' : 'padding'}
-        keyboardVerticalOffset={insets.top}
+        behavior={Platform.OS === 'ios' ? 'height' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? insets.top : 0}
       >
         {/* Messages FlatList - Takes remaining space */}
         <FlatList
@@ -367,9 +367,13 @@ export function MessageView({
           style={[
             styles.composerWrap,
             {
-              paddingBottom: Platform.OS === 'ios' ? insets.bottom - 16 : insets.bottom,
+              paddingBottom: Platform.OS === 'ios' ? insets.bottom - 16 : 16,
               borderTopColor: borderColor,
               backgroundColor,
+              // For Android: when keyboard is open, add keyboard height to composer height + bottom padding
+              ...(Platform.OS === 'android' && keyboardHeight > 0 && {
+                height: keyboardHeight + 64 + 16, // 64 is base composer height + 16 is bottom padding
+              }),
             },
           ]}
         >
@@ -537,7 +541,8 @@ const styles = StyleSheet.create({
   },
   composerWrap: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
     gap: 8,
     paddingHorizontal: 16,
     paddingTop: 12,

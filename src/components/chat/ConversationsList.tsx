@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { Box } from 'lucide-react-native';
 
 interface Conversation {
   id: string;
@@ -151,6 +152,7 @@ export function ConversationsList({
       {/* Conversation List */}
       <ScrollView 
         style={styles.list}
+        contentContainerStyle={styles.listContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -162,15 +164,14 @@ export function ConversationsList({
       >
         {filteredConversations.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={[styles.emptyText, { color: mutedColor }]}>
-              {activeTab === 'open' && 'No open conversations'}
-              {activeTab === 'newest' && 'No conversations today'}
-              {activeTab === 'resolved' && 'No resolved conversations'}
+            <Box size={48} color={mutedColor} style={styles.emptyIcon} />
+            <Text style={[styles.emptyText, { color: textColor }]}>
+              Oopsss nothing here
             </Text>
             <Text style={[styles.emptySubtext, { color: mutedColor }]}>
-              {activeTab === 'open' && 'All conversations are resolved'}
+              {activeTab === 'open' && 'No open conversations today'}
               {activeTab === 'newest' && 'No new conversations today'}
-              {activeTab === 'resolved' && 'No conversations have been resolved yet'}
+              {activeTab === 'resolved' && 'No resolved conversations yet'}
             </Text>
           </View>
         ) : (
@@ -288,16 +289,31 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
+  listContent: {
+    paddingBottom: 100,
+  },
   emptyState: {
-    padding: 24,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 48,
+    minHeight: 200,
+  },
+  emptyIcon: {
+    marginBottom: 16,
+    opacity: 0.6,
   },
   emptyText: {
-    fontSize: 14,
-    marginBottom: 4,
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 12,
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 20,
   },
   conversationItem: {
     padding: 12,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,8 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
+  BackHandler,
+  ToastAndroid,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../context/ThemeContext';
@@ -54,6 +56,7 @@ export default function DashboardScreen() {
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
   const [showCustomerInfo, setShowCustomerInfo] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [backPressCount, setBackPressCount] = useState(0);
 
   const backgroundColor = isDarkMode ? '#0f172a' : '#ffffff';
   const textColor = isDarkMode ? '#ffffff' : '#0f172a';
@@ -73,6 +76,59 @@ export default function DashboardScreen() {
     setSelectedConversationId(null);
     setHighlightedMessageId(null);
   };
+
+  // Handle Android back button behavior
+  useEffect(() => {
+    const backAction = () => {
+      // If viewing a conversation, go back to conversations list
+      if (selectedConversationId) {
+        handleBackToConversations();
+        return true; // Prevent default behavior
+      }
+
+      // If viewing notifications, go back to main screen
+      if (showNotifications) {
+        setShowNotifications(false);
+        return true; // Prevent default behavior
+      }
+
+      // If viewing customer info drawer, close it
+      if (showCustomerInfo) {
+        setShowCustomerInfo(false);
+        return true; // Prevent default behavior
+      }
+
+      // If in a sub-screen (agents, settings, installation), go back to more tab
+      if (['agents', 'settings', 'installation'].includes(activeTab)) {
+        setActiveTab('more');
+        return true; // Prevent default behavior
+      }
+
+      // If on home page (chats tab), implement "press back twice to exit"
+      if (activeTab === 'chats') {
+        if (backPressCount === 0) {
+          setBackPressCount(1);
+          // Reset counter after 2 seconds
+          setTimeout(() => setBackPressCount(0), 2000);
+          // Show native Android toast without icon
+          ToastAndroid.show('Press back again to exit', ToastAndroid.SHORT);
+          return true; // Prevent default behavior
+        } else {
+          // Second back press - exit app
+          BackHandler.exitApp();
+          return true;
+        }
+      }
+
+      // For other tabs, go to chats (home)
+      setActiveTab('chats');
+      return true; // Prevent default behavior
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
+  }, [selectedConversationId, showNotifications, showCustomerInfo, activeTab, backPressCount]);
 
   const handleSendMessage = async (content: string) => {
     try {

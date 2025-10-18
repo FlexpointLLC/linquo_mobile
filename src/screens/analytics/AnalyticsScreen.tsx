@@ -64,13 +64,25 @@ interface VisitorByCountry {
   }>;
 }
 
-// Helper function to format time ago
+// Helper function to format time ago with proper timezone handling
 const formatTimeAgo = (date: string): string => {
-  const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-  if (seconds < 60) return 'Just now';
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  return `${Math.floor(seconds / 86400)}d ago`;
+  try {
+    // Ensure the timestamp is parsed as UTC by adding 'Z' if not present (same as web app)
+    const utcDate = date.endsWith('Z') ? date : date + 'Z';
+    const lastSeenTime = new Date(utcDate).getTime();
+    const now = Date.now();
+    const seconds = Math.floor((now - lastSeenTime) / 1000);
+    
+    // Handle edge cases
+    if (seconds < 0) return 'Just now';
+    if (seconds < 60) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  } catch (error) {
+    console.error('Error formatting time ago:', error);
+    return 'Unknown';
+  }
 };
 
 export default function AnalyticsScreen() {

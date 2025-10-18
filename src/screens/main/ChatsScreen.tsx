@@ -204,7 +204,8 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   list: {
-    paddingVertical: 8,
+    paddingTop: 8,
+    paddingBottom: 100,
   },
   conversationItem: {
     flexDirection: 'row',

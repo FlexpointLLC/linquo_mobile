@@ -11,31 +11,28 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.linquo.app"
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/app-icon.png",
-        "backgroundColor": "#3b82f6"
-      },
-      "package": "com.linquo.app",
-      "softwareKeyboardLayoutMode": "resize",
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "linquo"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ]
-    },
+  "android": {
+    "icon": "./assets/app-icon.png",
+    "package": "com.linquo.app",
+    "softwareKeyboardLayoutMode": "resize",
+    "edgeToEdgeEnabled": true,
+    "predictiveBackGestureEnabled": false,
+    "intentFilters": [
+      {
+        "action": "VIEW",
+        "autoVerify": true,
+        "data": [
+          {
+            "scheme": "linquo"
+          }
+        ],
+        "category": [
+          "BROWSABLE",
+          "DEFAULT"
+        ]
+      }
+    ]
+  },
     "web": {
       "favicon": "./assets/favicon.png"
     },

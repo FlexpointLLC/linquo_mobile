@@ -252,6 +252,13 @@ export default function InstallationScreen({ onBack }: InstallationScreenProps) 
             </View>
           </View>
           
+          {/* Code Block */}
+          <View style={[styles.codeBlock, { backgroundColor: isDarkMode ? '#0f172a' : '#f8fafc', borderColor }]}>
+            <Text style={[styles.codeText, { color: textColor }]}>
+              {generateEmbedCode() || 'Loading embed code...'}
+            </Text>
+          </View>
+
           {/* Copy Button */}
           <View style={styles.copyButtonContainer}>
             <TouchableOpacity
@@ -271,13 +278,6 @@ export default function InstallationScreen({ onBack }: InstallationScreenProps) 
                 </>
               )}
             </TouchableOpacity>
-          </View>
-
-          {/* Code Block */}
-          <View style={[styles.codeBlock, { backgroundColor: isDarkMode ? '#0f172a' : '#f8fafc' }]}>
-            <Text style={[styles.codeText, { color: textColor }]}>
-              {generateEmbedCode() || 'Loading embed code...'}
-            </Text>
           </View>
         </View>
 
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   },
   copyButtonContainer: {
     paddingHorizontal: 16,
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   copyButton: {
     flexDirection: 'row',
@@ -473,8 +473,9 @@ const styles = StyleSheet.create({
   codeBlock: {
     padding: 16,
     marginHorizontal: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     borderRadius: 8,
+    borderWidth: 1,
   },
   codeText: {
     fontSize: 12,

@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { MessageCircle, BarChart3, Sparkles, Users, MoreHorizontal } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface BottomNavigationProps {
   activeTab: string;
@@ -24,6 +25,7 @@ const navItems = [
 
 export function BottomNavigation({ activeTab, onTabChange, hasUnreadMessages = false }: BottomNavigationProps) {
   const { isDarkMode } = useTheme();
+  const insets = useSafeAreaInsets();
 
   const backgroundColor = isDarkMode ? '#0f172a' : '#ffffff';
   const borderColor = isDarkMode ? '#334155' : '#e2e8f0';
@@ -33,7 +35,7 @@ export function BottomNavigation({ activeTab, onTabChange, hasUnreadMessages = f
   const isMoreTabActive = ['agents', 'settings', 'installation'].includes(activeTab);
 
   return (
-    <View style={[styles.container, { backgroundColor, borderTopColor: borderColor }]}>
+    <View style={[styles.container, { backgroundColor, borderTopColor: borderColor, paddingBottom: insets.bottom }]}>
       <View style={styles.nav}>
         {navItems.map(({ key, label, icon: Icon }) => {
           const isActive = key === 'more' ? isMoreTabActive : activeTab === key;

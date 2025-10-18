@@ -62,12 +62,12 @@ export function useConversations() {
 
       // Get customer data for all conversations
       const customerIds = conversations?.map(c => c.customer_id).filter(Boolean) || [];
-      let customerData: { id: string; display_name: string; email: string; unread_count_agent?: number }[] = [];
+      let customerData: { id: string; display_name: string; email: string }[] = [];
 
       if (customerIds.length > 0) {
         const { data: customers, error: customerError } = await supabase
           .from('customers')
-          .select('id,display_name,email,unread_count_agent')
+          .select('id,display_name,email')
           .in('id', customerIds);
 
         if (!customerError && customers) {
@@ -75,8 +75,28 @@ export function useConversations() {
         }
       }
 
-      // Get last message for each conversation
+      // Get unread count for each conversation based on read_by_agent
       const conversationIds = conversations?.map(c => c.id).filter(Boolean) || [];
+      const unreadCountsMap = new Map<string, number>();
+
+      if (conversationIds.length > 0) {
+        const { data: unreadMessages, error: unreadError } = await supabase
+          .from('messages')
+          .select('conversation_id')
+          .in('conversation_id', conversationIds)
+          .eq('org_id', agentData.org_id)
+          .eq('sender_type', 'CUSTOMER')
+          .eq('read_by_agent', false);
+
+        if (!unreadError && unreadMessages) {
+          unreadMessages.forEach((message) => {
+            const currentCount = unreadCountsMap.get(message.conversation_id) || 0;
+            unreadCountsMap.set(message.conversation_id, currentCount + 1);
+          });
+        }
+      }
+
+      // Get last message for each conversation
       const lastMessagesMap = new Map<string, { body_text: string; created_at: string }>();
 
       if (conversationIds.length > 0) {
@@ -103,10 +123,11 @@ export function useConversations() {
       const combinedData = conversations?.map(conv => {
         const customer = customerData.find(c => c.id === conv.customer_id);
         const lastMessage = lastMessagesMap.get(conv.id);
+        const unreadCount = unreadCountsMap.get(conv.id) || 0;
         return {
           ...conv,
           customers: customer || null,
-          unread: customer?.unread_count_agent || 0,
+          unread: unreadCount,
           last_body_text: lastMessage?.body_text || undefined
         };
       }) || [];
