@@ -7,13 +7,29 @@
     "icon": "./assets/app-icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "linquo",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4A90E2"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.linquo.app"
     },
   "android": {
     "icon": "./assets/app-icon.png",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#4A90E2",
+      "mdpi": "./assets/splash-icon.png",
+      "hdpi": "./assets/splash-icon.png",
+      "xhdpi": "./assets/splash-icon.png",
+      "xxhdpi": "./assets/splash-icon.png",
+      "xxxhdpi": "./assets/splash-icon.png"
+    },
     "package": "com.linquo.app",
+    "googleServicesFile": "./google-services.json",
     "softwareKeyboardLayoutMode": "resize",
     "edgeToEdgeEnabled": true,
     "predictiveBackGestureEnabled": false,
@@ -36,11 +52,15 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [],
+    "plugins": [
+      "@react-native-firebase/app"
+    ],
     "extra": {
       "eas": {
         "projectId": "9307bed5-21cb-400a-9213-ace7b985e270"
-      }
+      },
+      "EXPO_PUBLIC_SUPABASE_URL": "https://vzoteejdvffrdjprfpad.supabase.co",
+      "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6b3RlZWpkdmZmcmRqcHJmcGFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0NDg2NjMsImV4cCI6MjA3NDAyNDY2M30.OnExGM-A8Wmm-iNVHMjwFsS0iyNZjZuZXrzPRy5GqTw"
     },
     "owner": "ashikprottoy"
   }

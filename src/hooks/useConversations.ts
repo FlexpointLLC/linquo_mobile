@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './useAuth';
+import NotificationService from '../services/notificationService';
 
 export type Conversation = {
   id: string;
@@ -140,6 +141,12 @@ export function useConversations() {
       });
 
       setData(combinedData);
+
+          // Check for new messages and trigger notifications
+          const totalUnreadCount = combinedData.reduce((sum, conv) => sum + (conv.unread || 0), 0);
+          const notificationService = NotificationService.getInstance();
+          notificationService.checkForNewMessages(totalUnreadCount);
+
     } catch (err: any) {
       console.error('Error fetching conversations:', err);
       setError(err.message);
@@ -181,6 +188,11 @@ export function useConversations() {
                   const oldUnread = conversation.unread || 0;
                   conversation.unread = oldUnread + 1;
                   console.log('📈 Incremented unread count for conversation:', conversation.id, 'Old:', oldUnread, 'New:', conversation.unread);
+                  
+                      // Trigger notification for new customer message
+                      const notificationService = NotificationService.getInstance();
+                      const totalUnreadCount = updatedData.reduce((sum, conv) => sum + (conv.unread || 0), 0);
+                      notificationService.checkForNewMessages(totalUnreadCount);
                 }
 
                 updatedData.splice(conversationIndex, 1);

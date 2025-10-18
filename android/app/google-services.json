@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "605270110477",
+    "project_id": "linquo-push-notifications",
+    "storage_bucket": "linquo-push-notifications.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:605270110477:android:981bc88aca6631eda04044",
+        "android_client_info": {
+          "package_name": "com.linquo.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDIP4LAokxj4KlFR8X8edLwh1HrxEIEioU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

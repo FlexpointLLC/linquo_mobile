@@ -1,0 +1,6 @@
+{
+  "react-native": {
+    "android_app_id": "1:YOUR_ANDROID_APP_ID:android:YOUR_ANDROID_SHA1",
+    "ios_app_id": "1:YOUR_IOS_APP_ID:ios:YOUR_IOS_BUNDLE_ID"
+  }
+}

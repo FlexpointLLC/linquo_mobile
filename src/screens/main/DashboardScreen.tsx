@@ -27,6 +27,7 @@ import NotificationsScreen from '../notifications/NotificationsScreen';
 import { useConversations } from '../../hooks/useConversations';
 import { useMessages } from '../../hooks/useMessages';
 import { supabase } from '../../lib/supabase';
+import NotificationService from '../../services/notificationService';
 
 // Helper function to format timestamp
 const formatTimestamp = (dateString: string) => {
@@ -64,6 +65,29 @@ export default function DashboardScreen() {
   // Fetch conversations and messages
   const { conversations, loading: conversationsLoading, refresh: refreshConversations } = useConversations();
   const { messages, loading: messagesLoading, sendMessage } = useMessages(selectedConversationId);
+
+      // Initialize/re-initialize notification service when dashboard loads
+      useEffect(() => {
+        const initNotifications = async () => {
+          const notificationService = NotificationService.getInstance();
+          await notificationService.registerDeviceToken(); // Re-register token after login
+        };
+        initNotifications();
+      }, []);
+
+      // Reset notification count when user opens the app (views conversations)
+      useEffect(() => {
+        const resetNotifications = () => {
+          if (conversations && conversations.length > 0) {
+            const notificationService = NotificationService.getInstance();
+            const totalUnreadCount = conversations.reduce((sum, conv) => sum + (conv.unread || 0), 0);
+            // Reset the stored count to current count so no notifications are triggered
+            notificationService.checkForNewMessages(totalUnreadCount);
+          }
+        };
+        
+        resetNotifications();
+      }, [conversations]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
   const [isTakingOver, setIsTakingOver] = useState(false);
